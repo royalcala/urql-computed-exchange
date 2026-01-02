@@ -1,6 +1,6 @@
 {
   "name": "urql-computed-exchange-plus",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "URQL exchange to allow computed properties in GraphQL queries. Maintained fork with updated dependencies.",
   "keywords": [
     "urql",
@@ -21,8 +21,13 @@
     "build:watch": "tsc -w",
     "test": "jest",
     "test:watch": "jest --watch",
+    "test:integration": "jest --config ./jest.integration.config.js",
     "test:integration:watch": "jest --config ./jest.integration.config.js --watch",
-    "prepublishOnly": "npm run clean && npm run build",
+    "test:performance": "jest --config ./jest.performance.config.js --testTimeout=15000",
+    "test:all": "npm test && npm run test:integration && npm run test:performance",
+    "lint": "eslint src --ext .ts",
+    "lint:fix": "eslint src --ext .ts --fix",
+    "prepublishOnly": "npm run test:all && npm run build",
     "prepare": "husky install"
   },
   "lint-staged": {

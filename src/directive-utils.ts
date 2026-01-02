@@ -33,6 +33,7 @@ export function nodeHasComputedDirectives(node?: ASTNode): boolean {
 export function replaceDirectivesByFragments(
   query: DefinitionNode | DocumentNode | undefined,
   entities: Entities,
+  visitedNodes: Set<string> = new Set(),
 ): any {
   if (query == null) {
     return null;
@@ -56,8 +57,31 @@ export function replaceDirectivesByFragments(
       );
     }
 
+    // Create a unique key for this dependency to detect cycles
+    const dependencyKey = `${directiveType}:${fieldName}`;
+    
+    // Check for circular dependencies
+    if (visitedNodes.has(dependencyKey)) {
+      // Return an empty inline fragment to break the cycle
+      return {
+        kind: 'InlineFragment',
+        typeCondition: {
+          kind: 'NamedType',
+          name: { kind: 'Name', value: directiveType },
+        },
+        selectionSet: {
+          kind: 'SelectionSet',
+          selections: [],
+        },
+      };
+    }
+
+    // Add this node to visited set
+    const newVisitedNodes = new Set(visitedNodes);
+    newVisitedNodes.add(dependencyKey);
+
     // Replace directive node by fragment
-    return replaceDirectivesByFragments(entityField.dependencies?.definitions[0], entities);
+    return replaceDirectivesByFragments(entityField.dependencies?.definitions[0], entities, newVisitedNodes);
   };
 
   return visit(query, {
@@ -80,6 +104,7 @@ export function replaceDirectivesByFragments(
 export function addFragmentsFromDirectives(
   query: DefinitionNode | DocumentNode | undefined,
   entities: Entities,
+  visitedNodes: Set<string> = new Set(),
 ): any {
   if (query == null) {
     return null;
@@ -103,7 +128,30 @@ export function addFragmentsFromDirectives(
       );
     }
 
-    return addFragmentsFromDirectives(entityField.dependencies?.definitions[0], entities);
+    // Create a unique key for this dependency to detect cycles
+    const dependencyKey = `${directiveType}:${fieldName}`;
+    
+    // Check for circular dependencies
+    if (visitedNodes.has(dependencyKey)) {
+      // Return an empty inline fragment to break the cycle
+      return {
+        kind: 'InlineFragment',
+        typeCondition: {
+          kind: 'NamedType',
+          name: { kind: 'Name', value: directiveType },
+        },
+        selectionSet: {
+          kind: 'SelectionSet',
+          selections: [],
+        },
+      };
+    }
+
+    // Add this node to visited set
+    const newVisitedNodes = new Set(visitedNodes);
+    newVisitedNodes.add(dependencyKey);
+
+    return addFragmentsFromDirectives(entityField.dependencies?.definitions[0], entities, newVisitedNodes);
   };
 
   const firstPass = visit(query, {

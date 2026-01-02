@@ -3,32 +3,30 @@ import { map, pipe } from 'wonka';
 
 import { addFragmentsFromDirectives, replaceDirectivesByFragments } from './directive-utils';
 import { resolveData } from './resolve-data';
-import { AugmentedOperation, AugmentedOperationResult, Entities } from './types';
+import { Entities } from './types';
 
 export function computedExchange({ entities }: { entities: Entities }): Exchange {
   return ({ forward }) => (op$) =>
     pipe(
       op$,
-      map(
-        (op): AugmentedOperation => {
-          const { query } = op;
-          const augmentedOp: AugmentedOperation = op as AugmentedOperation;
+      map((op) => {
+        const { query } = op;
+        const augmentedOp = op as any;
 
-          augmentedOp.originalQuery = query;
+        augmentedOp.originalQuery = query;
 
-          // We need to combine fragments and computed properties
-          // otherwise, when we try to resolve, since nothing is calling the
-          // nested computed properties, they're never gonna be resolved
-          augmentedOp.mixedQuery = addFragmentsFromDirectives(query, entities);
-          augmentedOp.query = replaceDirectivesByFragments(query, entities);
+        // We need to combine fragments and computed properties
+        // otherwise, when we try to resolve, since nothing is calling the
+        // nested computed properties, they're never gonna be resolved
+        augmentedOp.mixedQuery = addFragmentsFromDirectives(query, entities);
+        augmentedOp.query = replaceDirectivesByFragments(query, entities);
 
-          return augmentedOp;
-        },
-      ),
+        return augmentedOp;
+      }),
       forward,
       map((res) => {
         const { data } = res;
-        const augmentedRes = res as AugmentedOperationResult;
+        const augmentedRes = res as any;
 
         augmentedRes.rawData = data;
         augmentedRes.data = resolveData(data, augmentedRes.operation, entities);
