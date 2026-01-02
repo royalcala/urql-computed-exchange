@@ -1,4 +1,4 @@
-import { difference, intersection, isEqual, union } from '../set-utils';
+import { difference, intersection, isEqual, symmetricDifference, union } from '../set-utils';
 
 describe('urql-computed-exchange', () => {
   describe('set-utils', () => {
@@ -11,11 +11,19 @@ describe('urql-computed-exchange', () => {
       });
     });
     describe('difference', () => {
+      it('returns the items in setA that are not in setB', () => {
+        const setA = new Set(['a', 'b', 'c']);
+        const setB = new Set(['b', 'c', 'd']);
+
+        expect(difference(setA, setB)).toEqual(new Set(['a']));
+      });
+    });
+    describe('symmetricDifference', () => {
       it('returns the items that are not common to the two sets', () => {
         const setA = new Set(['a', 'b', 'c']);
         const setB = new Set(['b', 'c', 'd']);
 
-        expect(difference(setA, setB)).toEqual(new Set(['a', 'd']));
+        expect(symmetricDifference(setA, setB)).toEqual(new Set(['a', 'd']));
       });
     });
     describe('intersection', () => {

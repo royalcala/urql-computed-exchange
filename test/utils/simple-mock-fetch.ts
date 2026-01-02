@@ -28,7 +28,7 @@ class SimpleMockFetch {
   }
 
   build(): typeof fetch {
-    const mockFetch = async (input: RequestInfo, init: RequestInit = {}) => {
+    const mockFetch = async (input: string | URL | Request, init: RequestInit = {}) => {
       if (typeof input !== 'string') {
         throw new Error('Unimplemented behavior.');
       }
@@ -39,9 +39,19 @@ class SimpleMockFetch {
       const response = this.getResponse(method as HTTPMethod, url);
 
       if (method === 'POST') {
-        return typeof response === 'function' ? response(init.body) : response;
+        const result = typeof response === 'function' ? response(init.body) : response;
+        const jsonData = result.json ? await result.json() : result;
+        return new Response(JSON.stringify(jsonData), {
+          status: result.status || 200,
+          headers: { 'content-type': 'application/json' },
+        });
       } else {
-        return typeof response === 'function' ? response() : response;
+        const result = typeof response === 'function' ? response() : response;
+        const jsonData = result.json ? await result.json() : result;
+        return new Response(JSON.stringify(jsonData), {
+          status: result.status || 200,
+          headers: { 'content-type': 'application/json' },
+        });
       }
     };
 

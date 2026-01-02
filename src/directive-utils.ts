@@ -1,7 +1,11 @@
 import { ASTNode, DefinitionNode, DocumentNode, FieldNode, visit } from 'graphql';
-import flatten from 'lodash/flatten';
 
 import { Entities, NodeWithDirectives } from './types';
+
+// Native flatten function to replace lodash/flatten
+function flatten<T>(arr: (T | T[])[]): T[] {
+  return arr.reduce<T[]>((acc, val) => acc.concat(Array.isArray(val) ? flatten(val) : val), []);
+}
 
 function _isNodeWithDirectives(node?: any): node is NodeWithDirectives {
   return node != null && node.directives != null;
@@ -115,7 +119,8 @@ export function addFragmentsFromDirectives(
   // of Field and InlineFragment from the firstPass
   return visit(firstPass, {
     SelectionSet(node) {
-      node.selections = flatten(node.selections);
+      const selections = [...node.selections]; // Create mutable copy
+      node.selections = flatten(selections as any);
       return node;
     },
   });

@@ -1,11 +1,13 @@
-# URQL Computed Exchange
+# URQL Computed Exchange Plus
 
 An [URQL](https://github.com/FormidableLabs/urql) exchange to compute data using resolvers and entities.
+
+**This is a maintained fork of the original `urql-computed-exchange` with updated dependencies and modern tooling.**
 
 ## Installation
 
 ```bash
-$ npm i urql-computed-exchange
+$ npm i urql-computed-exchange-plus
 ```
 
 ## Usage
@@ -14,7 +16,7 @@ First, create your entities and their resolvers:
 
 ```javascript
 // entities.js
-import { createEntity, mergeEntities } from 'urql-computed-exchange';
+import { createEntity, mergeEntities } from 'urql-computed-exchange-plus';
 
 const Pokemon = createEntity('Pokemon', {
   numberOfEvolutions: {
@@ -39,11 +41,10 @@ Then, add it to the list of exchanges in URQL when setting up the client:
 ```javascript
 // client.js
 
-import { computedExchange } from 'urql-computed-exchange';
+import { computedExchange } from 'urql-computed-exchange-plus';
 import {
   createClient,
   cacheExchange,
-  dedupExchange,
   fetchExchange,
 } from 'urql';
 
@@ -53,7 +54,6 @@ import entities from './entities';
 const client = createClient({
   url: 'https://graphql-pokemon.now.sh/',
   exchanges: [
-    dedupExchange,
     cacheExchange,
     computedExchange({ entities }),
     fetchExchange,

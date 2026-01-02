@@ -1,5 +1,5 @@
 import gql from 'fraql';
-import { Client, cacheExchange, createClient, dedupExchange, fetchExchange } from 'urql';
+import { Client, cacheExchange, createClient, fetchExchange } from 'urql';
 
 import { computedExchange, createEntity } from '../../src';
 import { createMockFetch, runQuery } from '../utils';
@@ -29,21 +29,20 @@ describe('urql-computed-exchange', () => {
           fetch: createMockFetch()
             .post('/graphql', {
               status: 200,
-              json: async () => {
-                return {
-                  data: {
-                    user: {
-                      id: 1,
-                      firstName: 'Lorem',
-                      lastName: 'Ipsum',
-                      __typename: 'User',
-                    },
+              json: async () => ({
+                data: {
+                  user: {
+                    id: 1,
+                    firstName: 'Lorem',
+                    lastName: 'Ipsum',
+                    __typename: 'User',
                   },
-                };
-              },
+                },
+              }),
             })
             .build(),
-          exchanges: [dedupExchange, cacheExchange, computedExchange({ entities }), fetchExchange],
+          exchanges: [cacheExchange, computedExchange({ entities }), fetchExchange],
+          preferGetMethod: false, // Force POST requests
         });
       });
 
@@ -58,7 +57,8 @@ describe('urql-computed-exchange', () => {
           }
         `;
 
-        const { data } = await runQuery(client, query);
+        const result = await runQuery(client, query);
+        const { data } = result;
         expect(data).toMatchObject({
           user: {
             id: 1,

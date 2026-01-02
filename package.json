@@ -1,13 +1,19 @@
 {
-  "name": "urql-computed-exchange",
-  "version": "1.0.1",
-  "description": "URQL exchange to allow computed properties in GraphQL queries.",
-  "keywords": [],
-  "license": "UNLICENSED",
+  "name": "urql-computed-exchange-plus",
+  "version": "1.0.2",
+  "description": "URQL exchange to allow computed properties in GraphQL queries. Maintained fork with updated dependencies.",
+  "keywords": [
+    "urql",
+    "graphql",
+    "computed",
+    "exchange",
+    "resolver"
+  ],
+  "license": "MIT",
   "main": "lib/index.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Drawbotics/urql-computed-filters"
+    "url": "https://github.com/YOUR_USERNAME/urql-computed-exchange-plus"
   },
   "scripts": {
     "clean": "rimraf lib/",
@@ -16,45 +22,44 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:integration:watch": "jest --config ./jest.integration.config.js --watch",
-    "prepublishOnly": "npm run clean && npm run build"
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged"
-    }
+    "prepublishOnly": "npm run clean && npm run build",
+    "prepare": "husky install"
   },
   "lint-staged": {
-    "*.{ts,tsx}": "eslint --ext ts,tsx --format node_modules/eslint-formatter-pretty -c .eslintrc.js --max-warnings=0"
+    "*.{ts,tsx}": [
+      "eslint --ext ts,tsx --format node_modules/eslint-formatter-pretty -c .eslintrc.js --max-warnings=0",
+      "prettier --write"
+    ]
   },
   "peerDependencies": {
-    "graphql": "14.x",
-    "urql": "1.8.x",
-    "wonka": "4.x"
+    "graphql": "^15.0.0 || ^16.0.0",
+    "urql": "^3.0.0 || ^4.0.0 || ^5.0.0",
+    "wonka": "^6.0.0"
   },
   "devDependencies": {
-    "@types/jest": "^24.9.0",
-    "@types/lodash": "^4.14.149",
-    "@types/react": "^16.9.18",
-    "@typescript-eslint/eslint-plugin": "^2.16.0",
-    "@typescript-eslint/parser": "^2.16.0",
-    "eslint": "^6.8.0",
-    "eslint-formatter-pretty": "^3.0.1",
-    "eslint-plugin-jest": "^23.6.0",
+    "@types/jest": "^30.0.0",
+    "@types/lodash": "^4.17.21",
+    "@types/react": "^18.0.0",
+    "@typescript-eslint/eslint-plugin": "^8.0.0",
+    "@typescript-eslint/parser": "^8.0.0",
+    "eslint": "^9.0.0",
+    "eslint-formatter-pretty": "^7.0.0",
+    "eslint-plugin-jest": "^29.0.0",
     "fraql": "^1.2.1",
-    "graphql": "^14.5.8",
-    "graphql-tag": "^2.10.1",
-    "husky": "^4.0.10",
+    "graphql": "^16.0.0",
+    "graphql-tag": "^2.12.6",
+    "husky": "^9.0.0",
     "import-sort-style-module": "^6.0.0",
-    "jest": "^24.9.0",
-    "lint-staged": "^9.5.0",
-    "prettier": "^1.19.1",
-    "prettier-plugin-import-sort": "0.0.3",
-    "react": "^16.12.0",
-    "rimraf": "^3.0.0",
-    "ts-jest": "^24.3.0",
-    "typescript": "^3.7.5",
-    "urql": "^1.8.2",
-    "wonka": "^4.0.7"
+    "jest": "^30.0.0",
+    "lint-staged": "^16.0.0",
+    "prettier": "^3.0.0",
+    "prettier-plugin-import-sort": "^0.0.7",
+    "react": "^18.0.0",
+    "rimraf": "^6.0.0",
+    "ts-jest": "^29.0.0",
+    "typescript": "^5.0.0",
+    "urql": "^5.0.0",
+    "wonka": "^6.0.0"
   },
   "dependencies": {
     "fclone": "^1.0.11",
