@@ -187,21 +187,21 @@ const client = createClient({
 });
 ```
 
-### With Retry Exchange
+### With Graphcache (Normalized Cache)
 ```typescript
-import { retryExchange } from '@urql/exchange-retry';
+import { cacheExchange } from '@urql/exchange-graphcache';
 
 const client = createClient({
   url: 'https://api.example.com/graphql',
   exchanges: [
-    cacheExchange,
-    retryExchange({
-      initialDelayMs: 1000,
-      maxDelayMs: 15000,
-      randomDelay: true,
-      maxNumberAttempts: 2,
+    cacheExchange({
+      keys: {
+        User: 'id',
+        Post: 'id',
+      },
+      // Your Graphcache configuration
     }),
-    computedExchange({ entities }),
+    computedExchange({ entities }), // AFTER cacheExchange
     fetchExchange,
   ],
 });

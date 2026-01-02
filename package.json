@@ -13,7 +13,7 @@
   "main": "lib/index.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/YOUR_USERNAME/urql-computed-exchange-plus"
+    "url": "https://github.com/royalcala/urql-computed-exchange-plus"
   },
   "scripts": {
     "clean": "rimraf lib/",
@@ -27,6 +27,10 @@
     "test:all": "npm test && npm run test:integration && npm run test:performance",
     "lint": "eslint src --ext .ts",
     "lint:fix": "eslint src --ext .ts --fix",
+    "release": "npm run test:all && npm run build && npm publish",
+    "release:patch": "npm version patch && npm run release",
+    "release:minor": "npm version minor && npm run release",
+    "release:major": "npm version major && npm run release",
     "prepublishOnly": "npm run test:all && npm run build",
     "prepare": "husky install"
   },
