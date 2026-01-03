@@ -1,4 +1,4 @@
-import { ASTNode, DefinitionNode, DocumentNode, FieldNode, visit } from 'graphql';
+import { ASTNode, DefinitionNode, DocumentNode, FieldNode, FragmentDefinitionNode, Kind, visit } from 'graphql';
 
 import { Entities, NodeWithDirectives } from './types';
 
@@ -80,8 +80,21 @@ export function replaceDirectivesByFragments(
     const newVisitedNodes = new Set(visitedNodes);
     newVisitedNodes.add(dependencyKey);
 
+    const firstDefinition = entityField.dependencies?.definitions[0];
+    
+    // If the first definition is a FragmentDefinition, convert it to a FragmentSpread
+    if (firstDefinition?.kind === Kind.FRAGMENT_DEFINITION) {
+      return {
+        kind: Kind.FRAGMENT_SPREAD,
+        name: {
+          kind: Kind.NAME,
+          value: firstDefinition.name.value,
+        },
+      };
+    }
+
     // Replace directive node by fragment
-    return replaceDirectivesByFragments(entityField.dependencies?.definitions[0], entities, newVisitedNodes);
+    return replaceDirectivesByFragments(firstDefinition, entities, newVisitedNodes);
   };
 
   return visit(query, {
@@ -105,6 +118,7 @@ export function addFragmentsFromDirectives(
   query: DefinitionNode | DocumentNode | undefined,
   entities: Entities,
   visitedNodes: Set<string> = new Set(),
+  collectedFragments: Map<string, FragmentDefinitionNode> = new Map(),
 ): any {
   if (query == null) {
     return null;
@@ -151,7 +165,23 @@ export function addFragmentsFromDirectives(
     const newVisitedNodes = new Set(visitedNodes);
     newVisitedNodes.add(dependencyKey);
 
-    return addFragmentsFromDirectives(entityField.dependencies?.definitions[0], entities, newVisitedNodes);
+    const firstDefinition = entityField.dependencies?.definitions[0];
+    
+    // If the first definition is a FragmentDefinition, collect it and return a FragmentSpread
+    if (firstDefinition?.kind === Kind.FRAGMENT_DEFINITION) {
+      const fragmentDef = firstDefinition as FragmentDefinitionNode;
+      collectedFragments.set(fragmentDef.name.value, fragmentDef);
+      
+      return {
+        kind: Kind.FRAGMENT_SPREAD,
+        name: {
+          kind: Kind.NAME,
+          value: fragmentDef.name.value,
+        },
+      };
+    }
+
+    return addFragmentsFromDirectives(firstDefinition, entities, newVisitedNodes, collectedFragments);
   };
 
   const firstPass = visit(query, {
@@ -165,11 +195,33 @@ export function addFragmentsFromDirectives(
 
   // Flatten nodes that instead of being a single node, are an array
   // of Field and InlineFragment from the firstPass
-  return visit(firstPass, {
+  const result = visit(firstPass, {
     SelectionSet(node) {
       const selections = [...node.selections]; // Create mutable copy
       node.selections = flatten(selections as any);
       return node;
     },
   });
+
+  // If we have collected fragments and this is a DocumentNode, add them to the definitions
+  if (result && result.kind === Kind.DOCUMENT && collectedFragments.size > 0) {
+    const existingFragmentNames = new Set(
+      result.definitions
+        .filter((def: any) => def.kind === Kind.FRAGMENT_DEFINITION)
+        .map((def: any) => def.name.value)
+    );
+
+    const newFragments = Array.from(collectedFragments.values()).filter(
+      (fragment) => !existingFragmentNames.has(fragment.name.value)
+    );
+
+    if (newFragments.length > 0) {
+      return {
+        ...result,
+        definitions: [...result.definitions, ...newFragments],
+      };
+    }
+  }
+
+  return result;
 }
