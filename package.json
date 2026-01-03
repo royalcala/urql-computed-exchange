@@ -1,6 +1,6 @@
 {
   "name": "urql-computed-exchange-plus",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "URQL exchange to allow computed properties in GraphQL queries. Maintained fork with updated dependencies.",
   "keywords": [
     "urql",

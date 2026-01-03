@@ -34,6 +34,7 @@ export function replaceDirectivesByFragments(
   query: DefinitionNode | DocumentNode | undefined,
   entities: Entities,
   visitedNodes: Set<string> = new Set(),
+  collectedFragments: Map<string, FragmentDefinitionNode> = new Map(),
 ): any {
   if (query == null) {
     return null;
@@ -82,22 +83,25 @@ export function replaceDirectivesByFragments(
 
     const firstDefinition = entityField.dependencies?.definitions[0];
     
-    // If the first definition is a FragmentDefinition, convert it to a FragmentSpread
+    // If the first definition is a FragmentDefinition, collect it and convert to a FragmentSpread
     if (firstDefinition?.kind === Kind.FRAGMENT_DEFINITION) {
+      const fragmentDef = firstDefinition as FragmentDefinitionNode;
+      collectedFragments.set(fragmentDef.name.value, fragmentDef);
+      
       return {
         kind: Kind.FRAGMENT_SPREAD,
         name: {
           kind: Kind.NAME,
-          value: firstDefinition.name.value,
+          value: fragmentDef.name.value,
         },
       };
     }
 
     // Replace directive node by fragment
-    return replaceDirectivesByFragments(firstDefinition, entities, newVisitedNodes);
+    return replaceDirectivesByFragments(firstDefinition, entities, newVisitedNodes, collectedFragments);
   };
 
-  return visit(query, {
+  const result = visit(query, {
     Field(node) {
       if (!nodeHasComputedDirectives(node)) {
         return undefined; // Don't do anything with this node
@@ -111,6 +115,28 @@ export function replaceDirectivesByFragments(
       }
     },
   });
+
+  // If we have collected fragments and this is a DocumentNode, add them to the definitions
+  if (result && result.kind === Kind.DOCUMENT && collectedFragments.size > 0) {
+    const existingFragmentNames = new Set(
+      result.definitions
+        .filter((def: any) => def.kind === Kind.FRAGMENT_DEFINITION)
+        .map((def: any) => def.name.value)
+    );
+
+    const newFragments = Array.from(collectedFragments.values()).filter(
+      (fragment) => !existingFragmentNames.has(fragment.name.value)
+    );
+
+    if (newFragments.length > 0) {
+      return {
+        ...result,
+        definitions: [...result.definitions, ...newFragments],
+      };
+    }
+  }
+
+  return result;
 }
 
 // Return type is "any" because that's the return type of the visit() function from graphql

@@ -111,7 +111,7 @@ describe('Fragment Definition Support', () => {
     expect(data.post).toBeDefined();
     expect(data.post.commentsWithReplies).toBeDefined();
     expect(Array.isArray(data.post.commentsWithReplies)).toBe(true);
-    
+
     // Verify the computed field worked correctly
     expect(data.post.commentsWithReplies).toHaveLength(3);
     expect(data.post.commentsWithReplies[0].replies).toHaveLength(1);
@@ -121,7 +121,7 @@ describe('Fragment Definition Support', () => {
   it('should properly convert fragment definitions to fragment spreads in the query', () => {
     // This test verifies the transformation at the AST level
     const { addFragmentsFromDirectives } = require('../../src/directive-utils');
-    
+
     const query = parse(`
       query PostWithComputedComments {
         post(id: "1") {
